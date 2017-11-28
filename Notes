@@ -1,0 +1,24 @@
+UUID: bc6b4f18-51af-44f1-b071-5fb450f4ca7a
+
+Token:
+
+{"error_code":0,"result":{
+
+
+
+"deviceList":[
+{"fwVer":"1.2.9 Build 170808 Rel.145916","deviceName":"Smart Wi-Fi Plug Mini","status":1,"alias":"Christmas Lights","deviceType":"IOT.SMARTPLUGSWITCH","appServerUrl":"https://use1-wap.tplinkcloud.com", "deviceModel":"HS105(US)","deviceMac":"50C7BFB21A20","role":0,"isSameRegion":true,"hwId":"E5D7E6089B060EF662783C23AE110522","fwId":"00000000000000000000000000000000","oemId":"003E098AF0D44D4BAB796B3F6A7A830E","deviceId":"800672725445CE0D42A27102C4DD6CEE18A62247","deviceHwVer":"1.0"},
+{"fwVer":"1.2.9 Build 170808 Rel.145916","deviceName":"Smart Wi-Fi Plug Mini","status":1,"alias":"Gold Beedrom Lamp","deviceType":"IOT.SMARTPLUGSWITCH","appServerUrl":"https://use1-wap.tplinkcloud.com","deviceModel":"HS105(US)","deviceMac":"50C7BFB21750","role":0,"isSameRegion":true,"hwId":"E5D7E6089B060EF662783C23AE110522","fwId":"00000000000000000000000000000000","oemId":"003E098AF0D44D4BAB796B3F6A7A830E","deviceId":"8006C311C86AECE52F7B7E78D721A7D218A61466","deviceHwVer":"1.0"}]}}
+
+
+##Turn on##
+curl --request POST "https://use1-wap.tplinkcloud.com/?token=133684b8-a297ad03d08447518f3d46e HTTP/1.1" \
+  --data '{"method":"passthrough", "params": {"deviceId": "800672725445CE0D42A27102C4DD6CEE18A62247", "requestData": "{\"system\":{\"set_relay_state\":{\"state\":1}}}" }}' \
+  --header "Content-Type: application/json"
+  
+##Turn Off##
+
+curl --request POST "https://use1-wap.tplinkcloud.com/?token=133684b8-a297ad03d08447518f3d46e HTTP/1.1" \
+  --data '{"method":"passthrough", "params": {"deviceId": "800672725445CE0D42A27102C4DD6CEE18A62247", "requestData": "{\"system\":{\"set_relay_state\":{\"state\":0}}}" }}' \
+  --header "Content-Type: application/json"
+  
