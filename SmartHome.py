@@ -6,44 +6,64 @@ from collections import OrderedDict
 
 
 def GetToken():
-	param = OrderedDict([("appType", "Kasa_Android"), ("cloudUserName","gmsiders@gmail.com"),("cloudPassword","***!"),("terminalUUID","bc6b4f18-51af-44f1-b071-5fb450f4ca7a")])
+	param = OrderedDict([("appType", "Kasa_Android"), ("cloudUserName","gmsiders@gmail.com"),("cloudPassword","********"),("terminalUUID","bc6b4f18-51af-44f1-b071-5fb450f4ca7a")])
 	data = json.dumps(OrderedDict([("method", "login") , ("params", param)]))
 	r = requests.post('https://wap.tplinkcloud.com', data=data)
 	token_data = json.loads(r.text)
 	token = token_data['result']['token']
 	return token
 
-
+def TestSetup(TestID):
+	if TestID == 1:
+		token = GetToken()
+		data = { "method" : "getDeviceList" }
+		param = {"token" : token }
+		r = requests.post('https://wap.tplinkcloud.com', params=param, data=json.dumps(data))
+		return r
+	else:
+		print("No Test Specified")
+		
 def GetKasaDeviceList(token):
 	data = { "method" : "getDeviceList" }
 	param = {"token" : token }
 	r = requests.post('https://wap.tplinkcloud.com', params=param, data=json.dumps(data))
 	device_list = json.loads(r.text)
-	ID = []
+	devices = []
 	for i in device_list['result']['deviceList']:
-		ID.append(i['deviceId'])
-	return ID
-
-
+		alias = i['alias']
+		id = i['deviceId']
+		devices.append([alias,id])
+	return devices
+	
+#1 = on 
+#0 = off
+#same as binary :)
+	
+def GetKasaDeviceStatus(token,id):
+	params = OrderedDict([("deviceId", id), ("requestData", "{\"system\":{\"get_sysinfo\":{}}}")])
+	data = json.dumps(OrderedDict([("method", "passthrough") , ("params", params)]))
+	param = {"token" : token } 
+	r = requests.post('https://use1-wap.tplinkcloud.com/', params=param, data=data)
+	device_status = json.loads(r.text)
+	status = json.loads(device_status['result']['responseData'])['system']['get_sysinfo']['relay_state']
+	if status == 1:
+		return "on"
+	if stauts == 0:
+		return "off"
+		
 def TurnOnSmartPlug(token,id):
 	params = OrderedDict([("deviceId", id), ("requestData", "{\"system\":{\"set_relay_state\":{\"state\":1}}}" )])
 	data = json.dumps(OrderedDict([("method", "passthrough") , ("params", params)]))
 	param = {"token" : token }
 	r = requests.post('https://use1-wap.tplinkcloud.com/', params=param, data=data)
-	print r.text
+	print(r.text)
 
 def TurnOffSmartPlug(token,id):
 	params = OrderedDict([("deviceId", id), ("requestData", "{\"system\":{\"set_relay_state\":{\"state\":0}}}" )])
 	data = json.dumps(OrderedDict([("method", "passthrough") , ("params", params)]))
 	param = {"token" : token }
 	r = requests.post('https://use1-wap.tplinkcloud.com/', params=param, data=data)
-	print r.text
-	
-	
-##Testing
+	print(r.text)
 
-token = GetToken()
-DeviceList = GetKasaDeviceList(token)
-ID = DeviceList[0]
-TurnOnSmartPlug(token,ID)
 
+	
