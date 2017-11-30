@@ -5,8 +5,11 @@ import json
 import requests
 ####SMART HOME API STUFF#####
 
+#So my password for my account is not on github...
+PassDoc = open("../../password.txt", 'r')
+Password = PassDoc.read()
 def GetToken():
-	param = OrderedDict([("appType", "Kasa_Android"), ("cloudUserName","gmsiders@gmail.com"),("cloudPassword","Samdobgs1!"),("terminalUUID","bc6b4f18-51af-44f1-b071-5fb450f4ca7a")])
+	param = OrderedDict([("appType", "Kasa_Android"), ("cloudUserName","gmsiders@gmail.com"),("cloudPassword", Password),("terminalUUID","bc6b4f18-51af-44f1-b071-5fb450f4ca7a")])
 	data = json.dumps(OrderedDict([("method", "login") , ("params", param)]))
 	r = requests.post('https://wap.tplinkcloud.com', data=data)
 	token_data = json.loads(r.text)
