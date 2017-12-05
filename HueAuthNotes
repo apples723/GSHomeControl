@@ -1,0 +1,74 @@
+https://my.meethue.com/en-us/?token=ca11b7e83e8cb6b83bea8f1482168faf7ed92aaf123f753f899b3ec99b3409cb291b97d961a419be07c9ace1e77069e076841297c7bf0a9e7f81904e54581cbe
+
+
+To make api requests to a bridge outside of a network you can use the api used on the mobile stie. Others have document on how to do this but all information I have found is outdated. 
+
+So how it works:
+	Mobile site uses the same syntax as the internal api and uses an X-Token to make requests. A flow of how that happens is below:
+		account.meethue.com checks for a logged in user:
+			/api/get-config and /api/get-user are called
+			responce with {"error":"no user session"}
+		user is sent to login page:
+			I use google oauth for my account so I'm sent to the google account page and sign in
+			after successful login from google you are redirected back to meethue
+				this a little hard to understand/script as this a google process and security is tight and would hard to reverse engineer	
+			a few things happend during this process:
+				a token is generated when you login and is put into a request to go back to account.meethue.com/login/google
+				that token is used to log you into meethue:
+					/api/login/google is called via post and the token from google is passed to the server and you are now authenticated
+					a authorization header is added to all requests now
+			before being redirected to my.meethue.com a api token for calls to the bridge is needed:
+				POST to account.meethue.com/api/request-token is made
+				with the authorization header from above
+				body with appid:
+					{appId: "myhue", deviceId: "Browser", deviceName: "Browser"}
+				response: 
+					authToken: hueauthorizontoken
+				
+				now directed to my.meethue.com
+					GET https://my.meethue.com/en-us/?token=*authtoken from last request*
+					response header is where we get the api token for all calls to the bridge:
+						Cookie: Set-Cookie: myhueapi:apikey
+					javascript is use to strip that cookie and read the api key
+					all actions on the site use javascript and make put requests with that token
+		My Hue Devices is loaded
+				
+				
+				
+1. Get your hue account api auth token.
+		Capture the trafic of the mobile site login using fiddler (this part could be scripted if I could break the ReCaptcha V2) 
+		make note of a few things:
+			the authorization on the header for /api/request-token
+			the response on /api/request-token it should be something along the lines of:
+				{"authToken":"long string of numbers and letters"}
+2. capture the cookie that set your x-token on login
+		make a get request to my.meethue.com with your token:
+			GET https://my.meethue.com/en-us/?token=*authToken from above*
+		this should get a response with a set-cookie:
+			Set-Cookie: myhueapi=fc2f45f3bf7c0b56f74c7a55bb480f3aa7cb1c3bac9c8e2368b589718717993f; Max-Age=2678400; Path=/; secure
+			The mobile site then uses javascript to capture the myhueapi and then uses it as a X-Token in the header to make api calls
+			as far as I can tell this token won't expire for a month or two at a time. 
+3. start making api requests:
+		the syntax is the same as the internal api
+		send put request to client.meethue.com/api/o/*internal api syntax*
+		include the X-Token captured from above
+		example:
+			to turn on a light:
+				PUT client.meethue.com/api/0/lights/7/state
+				Headers:
+					X-Token: myhueapi key
+				Paramaters:
+					Body:
+						{"on":true}
+						
+						
+PYTHON EXAMPLE:
+
+#Have to manually get token from above. then you can use this to get your x-token
+import requests
+s = requests.Session()
+s.get('https://my.meethue.com/en-us/?token=ca11b7e83e8cb6b83bea8f1482168faf7ed92aaf123f753f899b3ec99b3409cb291b97d961a419be07c9ace1e77069e076841297c7bf0a9e7f81904e54581cbe'
+cookies = s.cookies.get_dict()
+token = cookies['myhueapi']
+						
+					
