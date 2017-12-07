@@ -42,6 +42,7 @@ def GetBulbStatus(status, bulbid):
 #>>> j.dumps(json2)
 #'{"on": true, "bri": 114}'
 
+#Turns specific light off
 def TurnHueLightOff(header, bulbid):
 	header = header
 	id = bulbid
@@ -49,8 +50,16 @@ def TurnHueLightOff(header, bulbid):
 	data = json.dumps(data)
 	url = "https://client.meethue.com/api/0/lights/%i/state" % id 
 	r = requests.put(url,headers=header,data=data)
-	print(r.text)
+	result = json.loads(r.text)
+	error = 'error' in result[0]
+	if error == True:
+		result = "Error: Couldn't turn light off"
+	if error == False:
+		result = "Light succesfully turned on."
+	return result
 	
+
+#Turns specific light on
 def TurnHueLightOn(header, bulbid):
 	header = header
 	id = bulbid
@@ -58,7 +67,48 @@ def TurnHueLightOn(header, bulbid):
 	data = json.dumps(data)
 	url = "https://client.meethue.com/api/0/lights/%i/state" % id 
 	r = requests.put(url,headers=header,data=data)
-	print(r.text)
- 
+	result = json.loads(r.text)
+	error = 'error' in result[0]
+	if error == True:
+		result = "Error: Couldn't turn light on"
+	if error == False:
+		result = "Light succesfully turned on."
+	return result
 	
+#Gets all hue lights status 
+def GetAllHueStatus(header):
+	status = GetStatus(header)
+	status = json.loads(status)
+	lights = status['lights']
+	AllLightStates = []
+	for light in lights:
+		id = light
+		state = status['lights'][id]['state']['on']
+		if state == False:
+			state = "off"
+		if state == True:
+			state = "on"
+		bri = status['lights'][id]['state']['bri']
+		AllLightStates.append([id,state,bri])
+	return AllLightStates
+
+#Set brightness on specific hue light 
+def SetHueBrightness(header, bulbid, level):
+	id = bulbid
+	data = {"bri": level}
+	data = json.dumps(data)
+	url = "https://client.meethue.com/api/0/lights/%i/state" % id
+	r = requests.put(url,headers=header,data=data)
+	result = json.loads(r.text)
+	error = 'error' in result[0]
+	if error == True:
+		result = "Error: Light is either off or unreachable."
+	if error == False:
+		result = "Light brightness succesfully changed."
+	return result
+
+
+	
+	
+
 	
