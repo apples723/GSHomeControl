@@ -25,7 +25,7 @@ SECRET_KEY = '=5bdz#il&sk85ugzm!1v%1s_fm#*--_-mfl*&w&@kok!)m-%c!'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['gsiders.pythonanywhere.com']
 
 
 # Application definition
