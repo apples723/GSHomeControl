@@ -125,9 +125,9 @@ def TurnHueLightOn(header, bulbid):
 	result = json.loads(r.text)
 	error = 'error' in result[0]
 	if error == True:
-		result = "Error: Couldn't turn light on"
+		result = True
 	if error == False:
-		result = "Light succesfully turned on."
+		result = False
 	return result
 	
 #Gets all hue lights status 
@@ -138,13 +138,14 @@ def GetAllHueStatus(header):
 	AllLightStates = []
 	for light in lights:
 		id = light
+		name = status['lights'][id]['name']
 		state = status['lights'][id]['state']['on']
 		if state == False:
 			state = "off"
 		if state == True:
 			state = "on"
 		bri = status['lights'][id]['state']['bri']
-		AllLightStates.append([id,state,bri])
+		AllLightStates.append([id,name,state,bri])
 	return AllLightStates
 
 #Set brightness on specific hue light 
@@ -168,10 +169,12 @@ def SetHueBrightness(header, bulbid, level):
 class LightStatus:
 	def __init__(self,id):
 		self.id = id
+		self.name = None
 		self.state = None
 		self.bri = None
-	def add_data(self,id,state,bri):
+	def add_data(self,id,name,state,bri):
 		self.id = id
+		self.name = name
 		self.state = state
 		self.bri = bri
 
@@ -200,19 +203,67 @@ def dashboard(request):
 	for i in data[1]:
 		for light in i:
 			id = light[0]
-			state = light[1]
-			bri = light[2]
+			name = light[1]
+			state = light[2]
+			bri = light[3]
 			AllLights[id] = LightStatus(id)
-			AllLights[id].add_data(id,state,bri)
-	for i in AllLights:
-		print(AllLights[i].id)
-		print(AllLights[i].state)
-		print(AllLights[i].bri)
+			AllLights[id].add_data(id,name,state,bri)
 	status1 = GetKasaDeviceStatus(token, id1)
 	status2 = GetKasaDeviceStatus(token, id2)
-	List = [['a','b','c'], ['d','e','f']]
 	return render(request, 'index.html', {'id1': id1, 'status1': status1, 'name1': name1,'id2': id2, 'status2': status2, 'name2': name2,'lights': AllLights})
 	
+def turnonhue(request):
+	id = request.GET.get('id')
+	HueHeader = GetHeaders()
+	id = int(id)
+	print(type(id))
+	TurnHueLightOn(HueHeader, id)
+	#will turn all the shit below this into a function later...so I don't have to declare it everytime...i'm lazy
+	data = HomePageStrings()
+	token = data[0][0]['token']
+	id1 = data[0][0]['devices'][0][1]
+	id2 = data[0][0]['devices'][1][1]
+	name1 = data[0][0]['devices'][0][0]
+	name2 = data[0][0]['devices'][1][0]
+	AllLights = dict()
+	print(data[1])
+	for i in data[1]:
+		for light in i:
+			id = light[0]
+			name = light[1]
+			state = light[2]
+			bri = light[3]
+			AllLights[id] = LightStatus(id)
+			AllLights[id].add_data(id,name,state,bri)
+	status1 = GetKasaDeviceStatus(token, id1)
+	status2 = GetKasaDeviceStatus(token, id2)
+	return render(request, 'index.html', {'id1': id1, 'status1': status1, 'name1': name1,'id2': id2, 'status2': status2, 'name2': name2,'lights': AllLights})
+def turnoffhue(request):
+	id = request.GET.get('id')
+	HueHeader = GetHeaders()
+	id = int(id)
+	print(type(id))
+	TurnHueLightOff(HueHeader, id)
+	#will turn all the shit below this into a function later...so I don't have to declare it everytime...i'm lazy
+	data = HomePageStrings()
+	token = data[0][0]['token']
+	id1 = data[0][0]['devices'][0][1]
+	id2 = data[0][0]['devices'][1][1]
+	name1 = data[0][0]['devices'][0][0]
+	name2 = data[0][0]['devices'][1][0]
+	AllLights = dict()
+	print(data[1])
+	for i in data[1]:
+		for light in i:
+			id = light[0]
+			name = light[1]
+			state = light[2]
+			bri = light[3]
+			AllLights[id] = LightStatus(id)
+			AllLights[id].add_data(id,name,state,bri)
+	status1 = GetKasaDeviceStatus(token, id1)
+	status2 = GetKasaDeviceStatus(token, id2)
+	return render(request, 'index.html', {'id1': id1, 'status1': status1, 'name1': name1,'id2': id2, 'status2': status2, 'name2': name2,'lights': AllLights})
 	
 def turnoff(request):
 	token = GetToken()
