@@ -83,13 +83,14 @@ def GetAllHueStatus(header):
 	AllLightStates = []
 	for light in lights:
 		id = light
+		name = status['lights'][id]['name']
 		state = status['lights'][id]['state']['on']
 		if state == False:
 			state = "off"
 		if state == True:
 			state = "on"
 		bri = status['lights'][id]['state']['bri']
-		AllLightStates.append([id,state,bri])
+		AllLightStates.append([id,name,state,bri])
 	return AllLightStates
 
 #Set brightness on specific hue light 
